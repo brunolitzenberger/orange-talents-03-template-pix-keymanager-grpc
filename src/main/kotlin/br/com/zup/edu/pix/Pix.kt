@@ -8,6 +8,10 @@ import javax.validation.constraints.NotNull
 
 @Entity
 class Pix(
+
+    @Column(columnDefinition = "BINARY(16)")
+    var clienteId: UUID,
+
     @field:NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -29,6 +33,7 @@ class Pix(
 
     @Id
     @GeneratedValue
+    @Column(columnDefinition = "BINARY(16)")
     var id: UUID? = null
 
     var instante: LocalDateTime = LocalDateTime.now()

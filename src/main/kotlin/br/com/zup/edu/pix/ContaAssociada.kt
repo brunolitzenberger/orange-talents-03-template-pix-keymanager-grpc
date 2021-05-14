@@ -30,6 +30,8 @@ class ContaAssociada(
     val numeroDaConta: String
 ) {
 
-
+    fun validaDono(cpf: String?): Boolean{
+        return cpf == cpfDoTitular
+    }
 
 }

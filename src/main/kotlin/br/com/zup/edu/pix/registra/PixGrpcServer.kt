@@ -17,7 +17,6 @@ import javax.inject.Singleton
 class PixGrpcServer(@Inject val repository: PixRepository, @Inject val contaClient: ContaClient): KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceImplBase() {
 
     override fun registrar(request: KeyManagerRequest, responseObserver: StreamObserver<KeyManagerResponse>) {
-
         if (repository.existsByChave(request.chave)) {
             responseObserver.onError(
                 Status.ALREADY_EXISTS
@@ -28,14 +27,24 @@ class PixGrpcServer(@Inject val repository: PixRepository, @Inject val contaClie
         }
         try {
             val pixDTO = request.toDTO()
-            val conta: ContaDoCliente? = contaClient.buscaConta(pixDTO.clienteId, pixDTO.tipoConta.toString())
-            val contaAssociada: ContaAssociada? = conta?.toModel()
+            val conta: ContaDoCliente = contaClient.buscaConta(
+                pixDTO.clienteId,
+                pixDTO.tipoConta.toString()
+            ) ?: throw ContaNaoExisteException("Conta não existe")
+
+            val contaAssociada: ContaAssociada = conta.toModel()
             val pix = repository.save(pixDTO.toPix(contaAssociada))
             responseObserver.onNext(KeyManagerResponse.newBuilder().setPixId(pix.id.toString()).build())
             responseObserver.onCompleted()
         } catch (e: ChaveInvalidaException) {
             responseObserver.onError(
                 Status.INVALID_ARGUMENT
+                    .withDescription(e.message)
+                    .asRuntimeException()
+            )
+        }catch (e: ContaNaoExisteException){
+            responseObserver.onError(
+                Status.NOT_FOUND
                     .withDescription(e.message)
                     .asRuntimeException()
             )

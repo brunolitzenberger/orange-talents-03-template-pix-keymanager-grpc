@@ -10,6 +10,13 @@ package br.com.zup.edu;
 service KeyManagerGrpcService {
   rpc registrar (KeyManagerRequest) returns (KeyManagerResponse) {}
 }
+
+
+service KeyManagerRemoveService {
+  rpc remover (DeletePixKeyRequest) returns (DeletePixKeyResponse){}
+}
+
+
 enum TipoChave {
   CHAVE_DESCONHECIDA = 0;
   CPF = 1;
@@ -33,5 +40,14 @@ message KeyManagerRequest {
 
 message KeyManagerResponse {
   string pixId = 1;
+}
+
+message DeletePixKeyRequest{
+  string pixId = 1;
+  string clientId = 2;
+}
+
+message DeletePixKeyResponse{
+  string message = 1;
 }
 
