@@ -1,5 +1,9 @@
 package br.com.zup.edu.pix
 
+import br.com.zup.edu.pix.bancocentral.registra.AccountType
+import br.com.zup.edu.pix.bancocentral.BankAccount
+import br.com.zup.edu.pix.bancocentral.Owner
+import br.com.zup.edu.pix.bancocentral.registra.OwnerType.NATURAL_PERSON
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.validation.constraints.NotBlank
@@ -30,8 +34,12 @@ class ContaAssociada(
     val numeroDaConta: String
 ) {
 
-    fun validaDono(cpf: String?): Boolean{
-        return cpf == cpfDoTitular
+    fun toBankAccount(tipoConta: TipoConta?): BankAccount {
+        return BankAccount("123", agencia, numeroDaConta, AccountType.by(tipoConta))
+    }
+
+    fun toOwner(): Owner {
+        return Owner(NATURAL_PERSON, nomeDoTitular, cpfDoTitular)
     }
 
 }

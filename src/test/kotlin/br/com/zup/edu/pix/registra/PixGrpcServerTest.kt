@@ -7,6 +7,11 @@ import br.com.zup.edu.TipoChave.*
 import br.com.zup.edu.TipoConta.CONTA_CORRENTE
 import br.com.zup.edu.TipoConta.CONTA_DESCONHECIDA
 import br.com.zup.edu.pix.*
+import br.com.zup.edu.pix.bancocentral.BancoCentralClient
+import br.com.zup.edu.pix.bancocentral.registra.CreatePixKeyRequest
+import br.com.zup.edu.pix.bancocentral.registra.CreatePixKeyResponse
+import br.com.zup.edu.pix.bancocentral.PixKeyType
+import br.com.zup.edu.pix.mostra.PixKeyDetailsResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -23,50 +28,165 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
+import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import br.com.zup.edu.pix.TipoChave as TipoChavePix
 
 @MicronautTest(transactional = false)
-internal class PixGrpcServerTest(val repository: PixRepository, val grpcClient: KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceBlockingStub){
+    internal class PixGrpcServerTest(
+    val repository: PixRepository,
+    val grpcClient: KeyManagerGrpcServiceGrpc.KeyManagerGrpcServiceBlockingStub
+){
 
     @field:Inject
     lateinit var contaClient: ContaClient
 
+    @field:Inject
+    lateinit var bancoCentralClient: BancoCentralClient
+
 
     val instituicao: Instituicao = Instituicao("ITAÚ UNIBANCO S.A.", "60701190")
-    val titular: Titular = Titular("c56dfef4-7901-44fb-84e2-a2cefb157890", "Rafael M C Ponte", "02467781054")
+    val titular: Titular = Titular("5260263c-a3c1-4727-ae32-3bdb2538841b", "Rafael M C Ponte", "02467781054")
     val contaDoCliente: ContaDoCliente = ContaDoCliente(TipoConta.CONTA_CORRENTE, instituicao, "0001", "291900", titular)
-    val pix : Pix = Pix(UUID.fromString(titular.id), br.com.zup.edu.pix.TipoChave.CPF, titular.cpf, contaDoCliente.tipo, contaDoCliente.toModel())
+
+
 
     @BeforeEach
     fun setup(){
-
         repository.deleteAll()
     }
 
-    @ParameterizedTest
-    @MethodSource("validos")
-    fun `deve registrar uma chave pix`(tipo: TipoChave, chave: String){
+
+    @Test
+    fun `deve registrar uma chave pix do tipo aleatoria`(){
+        val pix : Pix = Pix(UUID.fromString(titular.id), TipoChavePix.ALEATORIA, "", contaDoCliente.tipo, contaDoCliente.toModel())
+        val requestBcb: CreatePixKeyRequest = pix.toCreatePixRequest()
+        val responseBcb: CreatePixKeyResponse = CreatePixKeyResponse(
+            PixKeyType.by(pix.tipoChave), pix.chave,
+            pix.conta?.toBankAccount(pix.tipoConta), pix.conta?.toOwner(), LocalDateTime.now()
+        )
         Mockito.`when`(contaClient
             .buscaConta(titular.id, "CONTA_CORRENTE"))
             .thenReturn(
-           contaDoCliente)
+                contaDoCliente)
+        Mockito.`when`(bancoCentralClient
+            .create(requestBcb))
+            .thenReturn(responseBcb)
         val response = grpcClient.registrar(
             KeyManagerRequest
                 .newBuilder()
-                .setChave(chave)
-                .setTipoChave(tipo)
+                .setChave("")
+                .setTipoChave(ALEATORIA)
                 .setTipoConta(CONTA_CORRENTE)
-                .setClienteId("c56dfef4-7901-44fb-84e2-a2cefb157890")
+                .setClienteId(titular.id)
                 .build()
         )
         assertNotNull(response.pixId)
         assertTrue(repository.existsById(UUID.fromString(response.pixId)))
     }
 
+
+
+    @Test
+    fun `deve registrar uma chave pix do tipo cpf`(){
+        //Cenário
+        val pix : Pix = Pix(UUID.fromString(titular.id), TipoChavePix.CPF, titular.cpf, contaDoCliente.tipo, contaDoCliente.toModel())
+        val requestBcb: CreatePixKeyRequest = pix.toCreatePixRequest()
+        val responseBcb: CreatePixKeyResponse = CreatePixKeyResponse(
+            PixKeyType.by(pix.tipoChave), pix.chave,
+            pix.conta?.toBankAccount(pix.tipoConta), pix.conta?.toOwner(), LocalDateTime.now()
+        )
+        Mockito.`when`(contaClient
+            .buscaConta(titular.id, "CONTA_CORRENTE"))
+            .thenReturn(
+                contaDoCliente)
+        Mockito.`when`(bancoCentralClient
+            .create(requestBcb))
+            .thenReturn(responseBcb)
+        //Ação
+        val response = grpcClient.registrar(
+            KeyManagerRequest
+                .newBuilder()
+                .setChave(titular.cpf)
+                .setTipoChave(CPF)
+                .setTipoConta(CONTA_CORRENTE)
+                .setClienteId(titular.id)
+                .build()
+        )
+        //Validação
+        assertNotNull(response.pixId)
+        assertTrue(repository.existsById(UUID.fromString(response.pixId)))
+    }
+
+    @Test
+    fun `deve registrar uma chave pix do tipo email`(){
+        //Cenário
+        val pix : Pix = Pix(UUID.fromString(titular.id), TipoChavePix.EMAIL, "teste@teste.com", contaDoCliente.tipo, contaDoCliente.toModel())
+        val requestBcb: CreatePixKeyRequest = pix.toCreatePixRequest()
+        val responseBcb: CreatePixKeyResponse = CreatePixKeyResponse(
+            PixKeyType.by(pix.tipoChave), pix.chave,
+            pix.conta?.toBankAccount(pix.tipoConta), pix.conta?.toOwner(), LocalDateTime.now()
+        )
+        Mockito.`when`(contaClient
+            .buscaConta(titular.id, "CONTA_CORRENTE"))
+            .thenReturn(
+                contaDoCliente)
+        Mockito.`when`(bancoCentralClient
+            .create(requestBcb))
+            .thenReturn(responseBcb)
+        //Ação
+        val response = grpcClient.registrar(
+            KeyManagerRequest
+                .newBuilder()
+                .setChave("teste@teste.com")
+                .setTipoChave(EMAIL)
+                .setTipoConta(CONTA_CORRENTE)
+                .setClienteId(titular.id)
+                .build()
+        )
+        //Validação
+        assertNotNull(response.pixId)
+        assertTrue(repository.existsById(UUID.fromString(response.pixId)))
+    }
+
+
+    @Test
+    fun `deve registrar uma chave pix do tipo telefone`(){
+        //Cenário
+        val pix : Pix = Pix(UUID.fromString(titular.id), TipoChavePix.TELEFONE, "+5547992929292", contaDoCliente.tipo, contaDoCliente.toModel())
+        val requestBcb: CreatePixKeyRequest = pix.toCreatePixRequest()
+        val responseBcb: CreatePixKeyResponse = CreatePixKeyResponse(
+            PixKeyType.by(pix.tipoChave), pix.chave,
+            pix.conta?.toBankAccount(pix.tipoConta), pix.conta?.toOwner(), LocalDateTime.now()
+        )
+        Mockito.`when`(contaClient
+            .buscaConta(titular.id, "CONTA_CORRENTE"))
+            .thenReturn(
+                contaDoCliente)
+        Mockito.`when`(bancoCentralClient
+            .create(requestBcb))
+            .thenReturn(responseBcb)
+        //Ação
+        val response = grpcClient.registrar(
+            KeyManagerRequest
+                .newBuilder()
+                .setChave("+5547992929292")
+                .setTipoChave(TELEFONE)
+                .setTipoConta(CONTA_CORRENTE)
+                .setClienteId(titular.id)
+                .build()
+        )
+        //Validação
+        assertNotNull(response.pixId)
+        assertTrue(repository.existsById(UUID.fromString(response.pixId)))
+    }
+
+
     @Test
     fun `nao deve adicionar uma chave que ja existe`(){
+        val pix : Pix = Pix(UUID.fromString(titular.id), TipoChavePix.CPF, titular.cpf, contaDoCliente.tipo, contaDoCliente.toModel())
         repository.save(pix)
 
         Mockito.`when`(contaClient
@@ -90,25 +210,7 @@ internal class PixGrpcServerTest(val repository: PixRepository, val grpcClient: 
         }
     }
 
-    @Test
-    fun `deve gerar uma chave aleatoria quando tipo chave for aleatorio`(){
 
-        Mockito.`when`(contaClient
-            .buscaConta(titular.id, "CONTA_CORRENTE"))
-            .thenReturn(
-                contaDoCliente)
-        val response = grpcClient.registrar(
-            KeyManagerRequest
-                .newBuilder()
-                .setChave("")
-                .setTipoChave(ALEATORIA)
-                .setTipoConta(CONTA_CORRENTE)
-                .setClienteId("c56dfef4-7901-44fb-84e2-a2cefb157890")
-                .build()
-        )
-        val pix = repository.findById(UUID.fromString(response.pixId))
-        assertNotEquals(pix.get().chave, "")
-    }
 
     @Test
     fun `deve gerar erro ao nao encontrar uma conta`(){
@@ -116,6 +218,7 @@ internal class PixGrpcServerTest(val repository: PixRepository, val grpcClient: 
             .buscaConta(UUID.randomUUID().toString(), "CONTA_CORRENTE"))
             .thenReturn(
                 contaDoCliente)
+
         val error = assertThrows<StatusRuntimeException> {
             grpcClient.registrar(
                 KeyManagerRequest
@@ -209,17 +312,17 @@ internal class PixGrpcServerTest(val repository: PixRepository, val grpcClient: 
             return listOf(
                 Arguments.of(CPF, "123"),
                 Arguments.of(TELEFONE, "9999999"),
-                Arguments.of(TipoChave.EMAIL, "teste.com"),
+                Arguments.of(EMAIL, "teste.com"),
                 Arguments.of(ALEATORIA, "123"))
         }
 
         @JvmStatic
         fun validos(): List<Arguments> {
             return listOf(
-                Arguments.of(CPF, "15593143030"),
-                Arguments.of(TELEFONE, "+5585988714077"),
-                Arguments.of(TipoChave.EMAIL, "teste@teste.com.br"),
-                Arguments.of(ALEATORIA, ""))
+                Arguments.of(CPF, "15593143030", TipoChavePix.CPF),
+                Arguments.of(TELEFONE, "+5585988714077", TipoChavePix.TELEFONE),
+                Arguments.of(EMAIL, "teste@teste.com.br", TipoChavePix.EMAIL),
+                Arguments.of(ALEATORIA, "", TipoChavePix.ALEATORIA));
         }
 
     }
@@ -229,6 +332,11 @@ internal class PixGrpcServerTest(val repository: PixRepository, val grpcClient: 
     @MockBean(ContaClient::class)
     fun contaMock(): ContaClient {
         return Mockito.mock(ContaClient::class.java)
+    }
+
+    @MockBean(BancoCentralClient::class)
+    fun bancoMock(): BancoCentralClient {
+        return Mockito.mock(BancoCentralClient::class.java)
     }
 
 

@@ -17,6 +17,14 @@ service KeyManagerRemoveService {
 }
 
 
+service KeyManagerShowService{
+  rpc listar(ShowPixKeyRequest) returns (ShowPixKeyResponse){}
+}
+
+service KeyManagerShowAllService{
+  rpc all(ShowAllPixKeyRequest) returns (ShowAllPixKeyResponse){}
+}
+
 enum TipoChave {
   CHAVE_DESCONHECIDA = 0;
   CPF = 1;
@@ -51,3 +59,57 @@ message DeletePixKeyResponse{
   string message = 1;
 }
 
+message ShowPixKeyRequest{
+  message PixIdFilter{
+    string clienteId = 1;
+    string pixId = 2;
+  }
+
+  oneof filter{
+      PixIdFilter pixId = 1;
+      string chavePix = 2;
+  }
+
+}
+
+message ShowPixKeyResponse{
+  message ChavePix {
+
+    message MostrarPixResponse {
+      TipoConta tipo = 1;
+      string instituicao = 2;
+      string titular = 3;
+      string cpf  = 4;
+      string agencia = 5;
+      string numeroDaConta = 6;
+    }
+
+    TipoChave tipo = 1;
+    string chave = 2;
+    MostrarPixResponse conta = 3;
+    string criadaEm = 4;
+  }
+
+  string clienteId = 1;
+  string pixId     = 2;
+  ChavePix chave   = 3;
+}
+
+message ShowAllPixKeyRequest{
+  string clienteId = 1;
+}
+
+message ShowAllPixKeyResponse{
+
+  string clienteId = 1;
+  repeated ChavePix chavePix = 2;
+
+  message ChavePix{
+    string pixId = 1;
+    TipoChave tipoChave = 2;
+    string chave = 3;
+    TipoConta tipoConta = 4;
+    string createdAt = 5;
+  }
+
+}

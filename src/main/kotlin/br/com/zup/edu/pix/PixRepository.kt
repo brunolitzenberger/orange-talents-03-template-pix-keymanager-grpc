@@ -7,5 +7,7 @@ import java.util.*
 @Repository
 interface PixRepository : CrudRepository<Pix, UUID> {
     fun existsByChave(chave: String?) :Boolean
+    fun findByChave(chave: String) : Optional<Pix>
+    fun findAllByClienteId(fromString: UUID?): List<Pix>
 
 }

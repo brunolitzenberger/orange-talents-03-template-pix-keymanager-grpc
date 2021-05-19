@@ -45,6 +45,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     implementation("io.micronaut:micronaut-validation")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.micronaut.xml:micronaut-jackson-xml")
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.1'
     testImplementation("io.micronaut:micronaut-http-client")
 }

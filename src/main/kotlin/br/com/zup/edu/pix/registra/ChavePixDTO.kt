@@ -14,15 +14,15 @@ import javax.validation.constraints.NotNull
 @Introspected
 data class ChavePixDTO(
     @field:NotBlank
-    @JsonProperty val clienteId: String?,
+    val clienteId: String?,
     @field:NotNull
-    @JsonProperty val tipoChave: TipoChave?,
+    val tipoChave: TipoChave?,
 
     @field:NotBlank
     @JsonProperty val chave: String?,
 
     @field:NotNull
-    @JsonProperty val tipoConta: TipoConta?
+    val tipoConta: TipoConta?
 
 ) {
 
