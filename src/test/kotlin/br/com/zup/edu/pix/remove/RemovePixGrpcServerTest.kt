@@ -44,8 +44,9 @@ internal class RemovePixGrpcServerTest(
 
     @Test
     fun `deve remover uma chave pix`(){
+
         val requestBcb: DeleteKeyRequest = pix.toDeletePixRequest()
-        val responseBcb: DeletePixKeyResponse = DeletePixKeyResponse(pix.chave, "123", LocalDateTime.now())
+        val responseBcb: DeletePixKeyResponse = DeletePixKeyResponse(pix.chave, "60701190", LocalDateTime.now())
         Mockito.`when`(bancoCentralClient.delete(
             requestBcb
         )).thenReturn(responseBcb)

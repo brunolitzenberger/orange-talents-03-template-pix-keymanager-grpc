@@ -64,7 +64,7 @@ class Pix(
     fun validaDono(clienteId: UUID) = this.clienteId.equals(clienteId)
 
     fun toDeletePixRequest(): DeletePixKeyRequest {
-        return DeletePixKeyRequest(chave, "123")
+        return DeletePixKeyRequest(chave, "60701190")
     }
 
     fun atualizaChave(chave: String?){

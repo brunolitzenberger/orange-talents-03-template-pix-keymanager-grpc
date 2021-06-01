@@ -18,7 +18,6 @@ data class MostraPixResponse(
     val contaAssociada: ContaAssociada?,
     val instanteRegistro: LocalDateTime = LocalDateTime.now()
 ) {
-
     companion object{
         fun new(pix: Pix): MostraPixResponse{
             return MostraPixResponse(

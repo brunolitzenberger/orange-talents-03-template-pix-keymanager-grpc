@@ -34,8 +34,13 @@ class ContaAssociada(
     val numeroDaConta: String
 ) {
 
+
+    companion object {
+        public val ITAU_UNIBANCO_ISPB: String = "60701190"
+    }
+
     fun toBankAccount(tipoConta: TipoConta?): BankAccount {
-        return BankAccount("123", agencia, numeroDaConta, AccountType.by(tipoConta))
+        return BankAccount(ITAU_UNIBANCO_ISPB, agencia, numeroDaConta, AccountType.by(tipoConta))
     }
 
     fun toOwner(): Owner {

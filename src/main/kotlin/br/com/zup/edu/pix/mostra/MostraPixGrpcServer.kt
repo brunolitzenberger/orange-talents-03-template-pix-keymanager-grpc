@@ -21,7 +21,7 @@ class MostraPixGrpcServer(
         request: ShowPixKeyRequest,
         responseObserver: StreamObserver<ShowPixKeyResponse>
     ) {
-        val filtroDeChaves = request.toModel(validator)
+        val filtroDeChaves: FiltroDeChaves = request.toModel(validator)
         val response = filtroDeChaves.filtra(repository, bancoCentralClient)
         responseObserver.onNext(
             ShowPixKeyResponse

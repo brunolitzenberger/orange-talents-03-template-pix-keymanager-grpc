@@ -1,7 +1,6 @@
 package br.com.zup.edu.pix.lista
 
 import br.com.zup.edu.KeyManagerShowAllServiceGrpc
-import br.com.zup.edu.KeyManagerShowServiceGrpc
 import br.com.zup.edu.ShowAllPixKeyRequest
 import br.com.zup.edu.pix.*
 import io.grpc.ManagedChannel
@@ -11,15 +10,11 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.hibernate.validator.internal.util.Contracts
-import org.hibernate.validator.internal.util.Contracts.assertNotEmpty
-import org.junit.After
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.RuntimeException
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
