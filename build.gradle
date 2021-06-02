@@ -39,6 +39,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("mysql:mysql-connector-java")
     runtimeOnly("com.h2database:h2")
+    testImplementation("org.testcontainers:postgresql")
     implementation("org.hibernate:hibernate-validator:6.1.6.Final")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mysql")
