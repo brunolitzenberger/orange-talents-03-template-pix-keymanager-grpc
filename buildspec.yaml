@@ -26,6 +26,7 @@ phases:
       - AWS_DEFAULT_REGION="$DEFAULT_REGION"
       - IMAGE_TAG="$IMAGE_TAG"
       - echo Build started on `date`
+      - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - echo Building the Docker image...
       - docker image ls
       - docker build -t $DEPLOYMENT_NAME .
