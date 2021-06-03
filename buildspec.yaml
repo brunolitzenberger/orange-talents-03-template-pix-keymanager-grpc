@@ -42,6 +42,6 @@ phases:
       - echo deploying to cluster...
       - helm version --short
       - helm lint pipeline/helm/ --values pipeline/helm/values.yaml
-      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --role-arn $ARN_ROLE
+      - aws eks update-kubeconfig --name eks-cluster-bruno --role-arn $ARN_ROLE
       - kubectl get nodes
       - helm upgrade -i $DEPLOYMENT_NAME pipeline/helm/ --values pipeline/helm/values.yaml
